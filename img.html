@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Convert img to base64</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .container {
+        display: flex;
+        height: 100%;
+      }
+      .item, .input {
+        border: solid 2px lightskyblue;
+        padding: 0px;
+        margin: 0px;
+      }
+      .item {
+        width: 50%;
+      }
+      .input {
+        font-size: 25px;
+      }
+    </style>
+    <script>
+      function generate() {
+        fetch(window.location.pathname, {
+          method: 'POST',
+          body: document.querySelector("#input").value
+        }).then(e => e.text())
+        .then(e => {
+          document.getElementById('iframe').src = e
+          document.getElementById('tx').value = e
+        })
+      }
+
+      document.addEventListener('keydown', event => (event.key === 'Enter') && generate())
+    </script>
+  </head>
+  <body>
+    <input autofocus type="text" id="input" class="input" value="" placeholder="Past url here and press Enter" />
+    <div class="container">
+      <textarea class="item" id="tx"></textarea>
+      <iframe class="item" id="iframe" src=""></iframe>
+    </div>
+  </body>
+</html>

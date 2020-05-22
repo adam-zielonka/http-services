@@ -1,0 +1,14 @@
+GET http://localhost:8000/
+###
+POST http://localhost:8000/
+
+https://adamzielonka.pro/favicon.ico
+###
+POST http://localhost:8000/
+
+https://adamzielonka.pro/
+###
+POST http://localhost:8000/
+
+https://not_exits.adamzielonka.pro/
+###
