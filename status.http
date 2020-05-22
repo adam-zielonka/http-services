@@ -1,0 +1,12 @@
+GET http://localhost:8000/
+###
+POST http://localhost:8000/
+
+https://adamzielonka.pro
+###
+POST http://localhost:8000/
+
+https://not_exist.adamzielonka.pro
+###
+POST http://localhost:8000/
+###
