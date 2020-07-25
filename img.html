@@ -6,47 +6,55 @@
     <title>Convert img to base64</title>
     <style>
       html, body {
-        height: 100%;
         margin: 0;
-        display: flex;
-        flex-direction: column;
-      }
-      .container {
-        display: flex;
         height: 100%;
       }
-      .item, .input {
-        border: solid 2px lightskyblue;
+      body {
+        display: grid;
+        grid-template-columns: 50% 50%;
+        grid-template-rows: 45px auto;
+        justify-items: stretch;
+      }
+      input {
+        font-size: 25px;
+        grid-column: 1 / span 2;
+      }
+      div {
+        grid-area: 2 / 1;
+        scroll-behavior: auto;
+        overflow: auto;
+        word-break: break-all;
+        font-family: 'Courier New', Courier, monospace;
+      }
+      iframe {
+        grid-area: 2 / 2;
+      }
+      input, div, iframe {
+        justify-self: stretch;
+        border: solid 5px lightskyblue;
         padding: 0px;
         margin: 0px;
       }
-      .item {
-        width: 50%;
-      }
-      .input {
-        font-size: 25px;
-      }
     </style>
     <script>
-      function generate() {
-        fetch(window.location.pathname, {
-          method: 'POST',
-          body: document.querySelector("#input").value
-        }).then(e => e.text())
-        .then(e => {
-          document.getElementById('iframe').src = e
-          document.getElementById('tx').value = e
-        })
+      async function generate() {
+        const input = document.querySelector("input")
+        const div = document.querySelector('div')
+        const iframe = document.querySelector('iframe')
+        
+        const response = await fetch(window.location.pathname, { method: 'POST', body: input.value })
+        const body = await response.text()
+        
+        div.innerHTML = body
+        iframe.src = response.status === 400 ? '' : body
       }
 
       document.addEventListener('keydown', event => (event.key === 'Enter') && generate())
     </script>
   </head>
   <body>
-    <input autofocus type="text" id="input" class="input" value="" placeholder="Past url here and press Enter" />
-    <div class="container">
-      <textarea class="item" id="tx"></textarea>
-      <iframe class="item" id="iframe" src=""></iframe>
-    </div>
+    <input autofocus placeholder="Past url here and press Enter" />
+    <div></div>
+    <iframe></iframe>
   </body>
 </html>
