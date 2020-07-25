@@ -1,50 +1,33 @@
-#!/usr/bin/env -S deno run --allow-net --allow-read=img.html --unstable
-import { serve } from "https://deno.land/std@0.52.0/http/server.ts"
-import { readFileStrSync } from "https://deno.land/std@0.52.0/fs/mod.ts";
+#!/usr/bin/env -S deno run --allow-net --allow-read=img.html
+import { serve } from "https://deno.land/std@0.62.0/http/server.ts"
 
-const html = readFileStrSync('img.html')
+const html = Deno.readFileSync('img.html')
 
-async function read(req) {
-  const buf = new Uint8Array(req.contentLength)
-  let bufSlice = buf
-  let totRead = 0
-  while (true) {
-    const nread = await req.body.read(bufSlice)
-    if (nread === null) break
-    totRead += nread
-    if (totRead >= req.contentLength) break
-    bufSlice = bufSlice.subarray(nread)
-  }
-  return new TextDecoder('utf-8').decode(buf)
+async function readBody(req) {
+  const buffer = new Uint8Array(req.contentLength)
+  await req.body.read(buffer)
+  return new TextDecoder('utf-8').decode(buffer)
 }
 
-async function base64Fetch(request) {
-  const text = await read(request)
+async function base64Fetch(url) {
+  const reduceToString = (result, charCode) => result + String.fromCharCode(charCode)
 
-  const headers = {
-    'Accept': '*/*',
-  }
-  let type = 'text/plain'
+  const response = await fetch(new Request(url), { headers: { Accept: '*/*' } })
+  const type = response.headers.get("Content-Type")
+  const buffer = await response.arrayBuffer()
+  const data = await btoa(Array.from(new Uint8Array(buffer)).reduce(reduceToString, ''))
 
-  const status = await fetch(new Request(text), {headers})
-   .then(e => {
-      type = e.headers.get("Content-Type")
-      return e.arrayBuffer()
-    })
-    .then(buffer => btoa(
-      [].slice.call(new Uint8Array(buffer))
-      .reduce((p,c) => p + String.fromCharCode(c), '')
-    ))
-    .then(e => 'data:' + type + ';base64,' + e.toString())
-    .catch(e => e.toString())
-
-  return status
+  return `data:${type};base64,${data.toString()}`
 }
 
 console.log("http://localhost:8000/")
 for await (const req of serve({ port: 8000 })) {
   if (req.method === 'POST') {
-    req.respond({ body: await base64Fetch(req) })
+    try {
+      req.respond({ body: await base64Fetch(await readBody(req)) })
+    } catch (error) {
+      req.respond({ body: error.toString(), status: 400 })
+    }
   } else {
     req.respond({ body: html })
   }
