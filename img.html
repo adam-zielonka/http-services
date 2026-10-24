@@ -45,8 +45,8 @@
         const response = await fetch(window.location.pathname, { method: 'POST', body: input.value })
         const body = await response.text()
         
-        div.innerHTML = body
-        iframe.src = response.status === 400 ? '' : body
+        div.textContent = body
+        iframe.src = response.ok ? body : ''
       }
 
       document.addEventListener('keydown', event => (event.key === 'Enter') && generate())
