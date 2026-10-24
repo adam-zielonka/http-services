@@ -15,6 +15,12 @@ test('targets need exact HTTP(S) origins and no credentials', () => {
   assert.equal(parseTarget('https://example.com/a', allowed).pathname, '/a')
   assert.throws(() => configuredOrigins('https://example.com/path'))
 })
+test('alternate loopback spellings normalize and are still blocked', async () => {
+  for (const value of ['http://2130706433', 'http://0x7f000001', 'http://127.1', 'http://[::ffff:7f00:1]']) {
+    const origins = new Set([new URL(value).origin])
+    await assert.rejects(safeFetch(value, origins), /Private/)
+  }
+})
 test('mixed DNS answers are rejected before connecting', async () => {
   let connections = 0
   await assert.rejects(safeFetch('https://example.com', allowed, {
